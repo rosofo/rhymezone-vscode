@@ -35,6 +35,7 @@
 	},
 	"dependencies": {
 		"cheerio": "^1.0.0-rc.12",
+		"node-json-db": "^2.3.0",
 		"request-light": "^0.7.0"
 	}
 }
