@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import * as cheerio from "cheerio";
 import { xhr, XHRResponse, getErrorStatusDescription } from "request-light";
 import { Config, JsonDB } from "node-json-db";
+import * as jsdom from "jsdom";
+import { setTimeout } from "timers/promises";
 
 async function fetchRhymes(word: string): Promise<string[]> {
   const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=perfect&org1=syl&org2=l&org3=y`;
@@ -11,6 +13,21 @@ async function fetchRhymes(word: string): Promise<string[]> {
     .map((i, el) => $(el).text())
     .get();
   return rhymes;
+}
+
+async function fetchCached(path: string, callback: () => Promise<any>) {
+  const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  const db = await getDb(workspace);
+  try {
+    const obj = await db.getObject(path);
+    console.debug("cache hit", path, obj);
+    return obj;
+  } catch (e) {
+    const result = await callback();
+    await db.push(path, result, true);
+    console.debug("cache miss", path, result);
+    return result;
+  }
 }
 
 async function getCachedRhymes(word: string): Promise<string[] | null> {
@@ -47,7 +64,7 @@ async function setCachedRhymes(word: string, rhymes: string[]) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  const provider = vscode.languages.registerCompletionItemProvider(
+  const completionProvider = vscode.languages.registerCompletionItemProvider(
     "markdown",
     {
       async provideCompletionItems(
@@ -84,5 +101,70 @@ export function activate(context: vscode.ExtensionContext) {
     "]"
   );
 
-  context.subscriptions.push(provider);
+  const hoverProvider = vscode.languages.registerHoverProvider("markdown", {
+    async provideHover(document, position, token) {
+      const word = document.getText(document.getWordRangeAtPosition(position));
+      const definition = await fetchCachedDefinition(word);
+      const synonyms = await fetchCachedSynonyms(word);
+
+      const markdown = new vscode.MarkdownString();
+      markdown.isTrusted = true;
+      markdown.supportHtml = true;
+      markdown.appendMarkdown(`### ${word}\n`);
+      for (const synonym of synonyms) {
+        const command = `command:rhymezone.replace?${encodeURIComponent(
+          JSON.stringify([position, synonym])
+        )}`;
+        markdown.appendMarkdown(`- [${synonym}](${command})\n`);
+      }
+      markdown.appendMarkdown(definition);
+      return new vscode.Hover(markdown);
+    },
+  });
+
+  const replaceCommand = vscode.commands.registerCommand(
+    "rhymezone.replace",
+    async (position: vscode.Position, word: string) => {
+      const doc = vscode.window.activeTextEditor?.document;
+      const editor = vscode.window.activeTextEditor;
+      editor?.edit((builder) => {
+        const range = doc?.getWordRangeAtPosition(position);
+        if (range) {
+          builder.replace(range, word);
+        }
+      });
+    }
+  );
+
+  context.subscriptions.push(completionProvider, replaceCommand, hoverProvider);
+}
+function fetchCachedDefinition(word: string) {
+  return fetchCached(`/definition/${word}`, async () => {
+    const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=def&org1=syl&org2=l&org3=y`;
+    const response: XHRResponse = await xhr({ url });
+    const $ = cheerio.load(response.responseText);
+    const definition = $("#rz-def-list").html();
+    return definition;
+  });
+}
+
+function fetchCachedSynonyms(word: string) {
+  return fetchCached(`/synonyms/${word}`, async () => {
+    const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=syn&org1=syl&org2=l&org3=y`;
+    const dom = await jsdom.JSDOM.fromURL(url, {
+      runScripts: "dangerously",
+      resources: "usable",
+    });
+    await setTimeout(1000);
+    const $ = cheerio.load(dom.window.document.body.innerHTML);
+    const syns = $(".res")
+      .map((i, el) => {
+        const cloned = $(el).clone();
+        cloned.children().remove();
+        return cloned.text();
+      })
+      .get();
+    console.debug(syns);
+    return syns;
+  });
 }
