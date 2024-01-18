@@ -4,6 +4,7 @@ import { xhr, XHRResponse, getErrorStatusDescription } from "request-light";
 import { Config, JsonDB } from "node-json-db";
 import * as jsdom from "jsdom";
 import { setTimeout } from "timers/promises";
+import { resultsView } from "./resultsView";
 
 async function fetchRhymes(word: string): Promise<string[]> {
   const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=perfect&org1=syl&org2=l&org3=y`;
@@ -64,6 +65,8 @@ async function setCachedRhymes(word: string, rhymes: string[]) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  resultsView();
+
   const completionProvider = vscode.languages.registerCompletionItemProvider(
     "markdown",
     {
