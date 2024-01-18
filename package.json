@@ -38,7 +38,8 @@
     "cheerio": "^1.0.0-rc.12",
     "jsdom": "^23.2.0",
     "node-json-db": "^2.3.0",
-    "request-light": "^0.7.0"
+    "request-light": "^0.7.0",
+    "zustand": "^4.4.7"
   },
   "contributes": {
     "viewsContainers": {
@@ -53,11 +54,17 @@
     "views": {
       "rhymezone": [
         {
-          "id": "synonyms",
-          "name": "Synonyms",
+          "id": "lookup",
+          "name": "Lookup",
           "when": "rhymezoneResultsEnabled"
         }
       ]
-    }
+    },
+    "commands": [
+      {
+        "command": "rhymezone.lookup",
+        "title": "Rhymezone: Lookup Word"
+      }
+    ]
   }
 }

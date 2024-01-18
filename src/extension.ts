@@ -1,71 +1,37 @@
 import * as vscode from "vscode";
-import * as cheerio from "cheerio";
-import { xhr, XHRResponse, getErrorStatusDescription } from "request-light";
-import { Config, JsonDB } from "node-json-db";
-import * as jsdom from "jsdom";
-import { setTimeout } from "timers/promises";
+import { getErrorStatusDescription } from "request-light";
 import { resultsView } from "./resultsView";
-
-async function fetchRhymes(word: string): Promise<string[]> {
-  const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=perfect&org1=syl&org2=l&org3=y`;
-  const response: XHRResponse = await xhr({ url });
-  const $ = cheerio.load(response.responseText);
-  const rhymes = $(".r")
-    .map((i, el) => $(el).text())
-    .get();
-  return rhymes;
-}
-
-async function fetchCached(path: string, callback: () => Promise<any>) {
-  const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  const db = await getDb(workspace);
-  try {
-    const obj = await db.getObject(path);
-    console.debug("cache hit", path, obj);
-    return obj;
-  } catch (e) {
-    const result = await callback();
-    await db.push(path, result, true);
-    console.debug("cache miss", path, result);
-    return result;
-  }
-}
-
-async function getCachedRhymes(word: string): Promise<string[] | null> {
-  const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  const db = await getDb(workspace);
-  const cache = await db.getObjectDefault<Record<string, string[]>>(
-    "/rhymes",
-    {}
-  );
-  return cache[word] || null;
-}
-async function getDb(workspace: string | undefined) {
-  const vscodeDir = vscode.Uri.joinPath(
-    vscode.Uri.parse(workspace!),
-    ".vscode"
-  );
-  const dbPath = vscode.Uri.joinPath(vscodeDir, "rhymeCache.json");
-  await vscode.workspace.fs.createDirectory(vscodeDir);
-  try {
-    await vscode.workspace.fs.stat(dbPath);
-  } catch (e) {
-    await vscode.workspace.fs.writeFile(dbPath, Buffer.from("{}"));
-  }
-
-  return new JsonDB(
-    new Config(dbPath.toString().replace(/(\.json|file:\/\/)/, ""))
-  );
-}
-
-async function setCachedRhymes(word: string, rhymes: string[]) {
-  const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  const db = await getDb(workspace);
-  await db.push(`/rhymes/${word}`, rhymes, true);
-}
+import {
+  getCachedRhymes,
+  fetchRhymes,
+  setCachedRhymes,
+  fetchAll,
+  store,
+} from "./rhymezone";
+import { fetchCachedDefinition, fetchCachedSynonyms } from "./rhymezone";
 
 export function activate(context: vscode.ExtensionContext) {
-  resultsView();
+  const resultsViewProvider = resultsView();
+
+  vscode.commands.registerCommand("rhymezone.lookup", async () => {
+    vscode.commands.executeCommand(
+      "setContext",
+      "rhymezoneResultsEnabled",
+      true
+    );
+
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+    const word = editor.document.getText(
+      editor.document.getWordRangeAtPosition(editor.selection.active)
+    );
+    fetchAll(word);
+    store.subscribe((state) => {
+      resultsViewProvider.results = { word, results: state };
+    });
+  });
 
   const completionProvider = vscode.languages.registerCompletionItemProvider(
     "markdown",
@@ -140,34 +106,4 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(completionProvider, replaceCommand, hoverProvider);
-}
-function fetchCachedDefinition(word: string) {
-  return fetchCached(`/definition/${word}`, async () => {
-    const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=def&org1=syl&org2=l&org3=y`;
-    const response: XHRResponse = await xhr({ url });
-    const $ = cheerio.load(response.responseText);
-    const definition = $("#rz-def-list").html();
-    return definition;
-  });
-}
-
-function fetchCachedSynonyms(word: string) {
-  return fetchCached(`/synonyms/${word}`, async () => {
-    const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=syn&org1=syl&org2=l&org3=y`;
-    const dom = await jsdom.JSDOM.fromURL(url, {
-      runScripts: "dangerously",
-      resources: "usable",
-    });
-    await setTimeout(1000);
-    const $ = cheerio.load(dom.window.document.body.innerHTML);
-    const syns = $(".res")
-      .map((i, el) => {
-        const cloned = $(el).clone();
-        cloned.children().remove();
-        return cloned.text();
-      })
-      .get();
-    console.debug(syns);
-    return syns;
-  });
 }
