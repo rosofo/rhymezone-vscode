@@ -1,3 +1,5 @@
+![Rhymezone for VSCode](./resources/icon.svg)
+
 # Rhymezone Extension for VSCode
 
 Why would anyone do this?
