@@ -8,6 +8,7 @@ import { Results } from "./resultsView";
 import { createStore } from "zustand/vanilla";
 
 export const store = createStore<{
+  word?: string;
   rhymes: string[];
   definition: string | null;
   synonyms: string[];
@@ -48,14 +49,15 @@ export async function fetchCached(path: string, callback: () => Promise<any>) {
 }
 
 export async function fetchAll(word: string) {
+  store.setState({ word });
   const promises = [
     fetchCached(`/rhymes/${word}`, async () => {
       const rhymes = await fetchRhymes(word);
       await setCachedRhymes(word, rhymes);
       return rhymes;
     }).then(store.getState().setRhymes),
-    await fetchCachedDefinition(word).then(store.getState().setDefinition),
-    await fetchCachedSynonyms(word).then(store.getState().setSynonyms),
+    fetchCachedDefinition(word).then(store.getState().setDefinition),
+    fetchCachedSynonyms(word).then(store.getState().setSynonyms),
   ];
   await Promise.all(promises);
 }

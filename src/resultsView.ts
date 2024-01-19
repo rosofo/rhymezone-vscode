@@ -12,9 +12,7 @@ class Result implements vscode.TreeItem {
   get tooltip(): string {
     return `${this.label}`;
   }
-  get description(): string {
-    return `${this.label}`;
-  }
+  description?: string | boolean | undefined;
   contextValue = "result";
 }
 
@@ -24,8 +22,8 @@ class ResultsViewProvider implements vscode.TreeDataProvider<Result> {
   readonly onDidChangeTreeData: vscode.Event<Result | undefined | void> =
     this._onDidChangeTreeData.event;
 
-  private _results: { word: string; results: Results } | undefined;
-  set results(results: { word: string; results: Results } | undefined) {
+  private _results: { word?: string; results: Results } | undefined;
+  set results(results: { word?: string; results: Results } | undefined) {
     this._results = results;
     this.refresh();
   }
@@ -41,8 +39,10 @@ class ResultsViewProvider implements vscode.TreeDataProvider<Result> {
     if (!element) {
       const synonyms = new Result("synonyms");
       synonyms.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+      synonyms.description = `${this._results?.results.synonyms.length ?? ""}`;
       const rhymes = new Result("rhymes");
       rhymes.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+      rhymes.description = `${this._results?.results.rhymes?.length ?? ""}`;
       return [rhymes, synonyms];
     } else if (element.label === "synonyms") {
       return this._results?.results.synonyms?.map(
@@ -56,6 +56,8 @@ class ResultsViewProvider implements vscode.TreeDataProvider<Result> {
 
 export function resultsView() {
   const provider = new ResultsViewProvider();
-  vscode.window.registerTreeDataProvider("lookup", provider);
-  return provider;
+  const view = vscode.window.createTreeView("lookup", {
+    treeDataProvider: provider,
+  });
+  return [view, provider] as const;
 }

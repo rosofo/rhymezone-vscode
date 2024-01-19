@@ -11,7 +11,10 @@ import {
 import { fetchCachedDefinition, fetchCachedSynonyms } from "./rhymezone";
 
 export function activate(context: vscode.ExtensionContext) {
-  const resultsViewProvider = resultsView();
+  const [view, resultsViewProvider] = resultsView();
+  store.subscribe((state) => {
+    resultsViewProvider.results = { word: state.word, results: state };
+  });
 
   vscode.commands.registerCommand("rhymezone.lookup", async () => {
     vscode.commands.executeCommand(
@@ -19,6 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
       "rhymezoneResultsEnabled",
       true
     );
+    vscode.commands.executeCommand("lookup.focus");
 
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -27,9 +31,18 @@ export function activate(context: vscode.ExtensionContext) {
     const word = editor.document.getText(
       editor.document.getWordRangeAtPosition(editor.selection.active)
     );
-    fetchAll(word);
-    store.subscribe((state) => {
-      resultsViewProvider.results = { word, results: state };
+
+    vscode.window.withProgress({ location: { viewId: "rhymezone" } }, () =>
+      fetchAll(word)
+    );
+
+    vscode.window.onDidChangeTextEditorSelection((e) => {
+      const word = editor.document.getText(
+        editor.document.getWordRangeAtPosition(editor.selection.active)
+      );
+      vscode.window.withProgress({ location: { viewId: "rhymezone" } }, () =>
+        fetchAll(word)
+      );
     });
   });
 
@@ -42,7 +55,10 @@ export function activate(context: vscode.ExtensionContext) {
         token: vscode.CancellationToken,
         context: vscode.CompletionContext
       ) {
-        const wordRange = document.getWordRangeAtPosition(position);
+        const wordRange = document.getWordRangeAtPosition(
+          position,
+          /[\w\-\]]+/
+        );
         let word = document.getText(wordRange);
         word = word.slice(0, word.length - 1);
 
@@ -60,7 +76,8 @@ export function activate(context: vscode.ExtensionContext) {
           // a simple completion item which inserts `Hello World!`
           {
             /* a simple completion item which inserts `Hello World!`*/
-            const completion = new vscode.CompletionItem(rhyme);
+            const completion = new vscode.CompletionItem({ label: rhyme });
+            completion.range = wordRange;
             completion.filterText = word;
             return completion;
           }
