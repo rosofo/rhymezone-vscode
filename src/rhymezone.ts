@@ -105,27 +105,15 @@ export function fetchCachedDefinition(word: string) {
 export function fetchCachedSynonyms(word: string) {
   return fetchCached(`/synonyms/${word}`, async () => {
     const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=syn&org1=syl&org2=l&org3=y`;
-    const dom = await jsdom.JSDOM.fromURL(url, {
-      runScripts: "dangerously",
-      resources: "usable",
-    });
-    for (const _i of Array(1000)) {
-      if (dom.window.document.querySelector(".res") !== null) {
-        console.debug(`page loaded`);
-        break;
-      }
-      await setTimeout(20);
-    }
+    const dom = await jsdom.JSDOM.fromURL(url, {});
 
-    const $ = cheerio.load(dom.window.document.body.innerHTML);
-    const syns: string[] = $(".res")
-      .map((i, el) => {
-        const cloned = $(el).clone();
-        cloned.children().remove();
-        return cloned.text();
-      })
-      .get();
-    console.debug(syns);
-    return syns;
+    let results;
+    for (const script of dom.window.document.body.querySelectorAll("script")) {
+      if (script.text?.includes("THESAURUS_RESULTS")) {
+        results = JSON.parse(script.text.match(/\[.+\]/)![0]);
+      }
+    }
+    console.debug(results);
+    return results.map((syn: any) => syn.word);
   });
 }
