@@ -1,4 +1,4 @@
-![Rhymezone for VSCode](./resources/icon.svg)
+![Rhymezone for VSCode](./resources/icon-bg.svg)
 
 # Rhymezone Extension for VSCode
 
