@@ -15,8 +15,12 @@ export function activate(context: vscode.ExtensionContext) {
   store.subscribe((state) => {
     resultsViewProvider.results = { word: state.word, results: state };
   });
+  let tokenSource = new vscode.CancellationTokenSource();
 
   vscode.commands.registerCommand("rhymezone.lookup", async () => {
+    tokenSource.cancel();
+    tokenSource = new vscode.CancellationTokenSource();
+
     vscode.commands.executeCommand(
       "setContext",
       "rhymezoneResultsEnabled",
@@ -32,16 +36,19 @@ export function activate(context: vscode.ExtensionContext) {
       editor.document.getWordRangeAtPosition(editor.selection.active)
     );
 
-    vscode.window.withProgress({ location: { viewId: "rhymezone" } }, () =>
-      fetchAll(word)
+    vscode.window.withProgress({ location: { viewId: "lookup" } }, () =>
+      fetchAll(word, tokenSource.token)
     );
 
     vscode.window.onDidChangeTextEditorSelection((e) => {
+      tokenSource.cancel();
+      tokenSource = new vscode.CancellationTokenSource();
+
       const word = editor.document.getText(
         editor.document.getWordRangeAtPosition(editor.selection.active)
       );
-      vscode.window.withProgress({ location: { viewId: "rhymezone" } }, () =>
-        fetchAll(word)
+      vscode.window.withProgress({ location: { viewId: "lookup" } }, () =>
+        fetchAll(word, tokenSource.token)
       );
     });
   });

@@ -1,30 +1,15 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="31px" height="31px" viewBox="-0.5 -0.5 31 31" content="&lt;mxfile&gt;&lt;diagram id=&quot;4aZTQdCSg_y68M36ZjkS&quot; name=&quot;Page-1&quot;&gt;jZPNcoIwEICfhruQUdtjRdteeqmHnlOyQqYhy4RVwafvYhKBOs70wux++78bEpHX3ZuTTfWBCkySLVSXiG2SZas1fwa993omAiidVh6lI9jrCwS4CPSoFbQzR0I0pJs5LNBaKGjGpHN4nrsd0MyrNrKEO7AvpLmnX1pR5elTth75O+iyipXT1bO31DI6h0naSio8T5DYJSJ3iOSlusvBDKuLe/Fxrw+st8YcWPpPQOYDTtIcw2yfoTHq47QEHefaVFQbBimL0ujSslxwFXAMTuBI835egqHWSg3hGwetvsjva6oF6w1qS9ftLzfJcjvkOhK2/sJD6pYc/kCOBjnv1qIdshy0MX9Q6JvrQvdw9vS2UX6IgDWQ69klBix9RB+vFPTzeFIRzlRNrhmZDI+ovCUe98xCWHVUx5NebZPfQux+AQ==&lt;/diagram&gt;&lt;/mxfile&gt;">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="62px" height="61px" viewBox="-0.5 -0.5 62 61" content="&lt;mxfile&gt;&lt;diagram id=&quot;4aZTQdCSg_y68M36ZjkS&quot; name=&quot;Page-1&quot;&gt;7Vhdb9sgFP01frUMGBsel7TdXiZV6qQ9M5smVh1jEfK1Xz+wITaxk3hqm2lS+lDDMRffey7nAgnQfLX/Klm9/C5yXgYwyvcBegggRCDW/w1waAFAQAssZJFbqANeit/cgpFFN0XO195AJUSpitoHM1FVPFMexqQUO3/Yqyj9r9ZswQfAS8bKIfqzyNXSeRd1+DdeLJbq5MWKubEWWC9ZLnY9CD0GaC6FUG1rtZ/z0lDnaGntns68PfoleaUmGSStxZaVGxubdUwdXLALKTZ1gGZsXbdcvhZ7ru1n1pRLxfdjtLNfbopo6Bc4RqsXCRcrruRBD7ETOYuD3911ZCcWWvZ4dhiz6V0c5+0o0A3LwjgjZCoh7wo+GY++Fx+mIe3/kWQYL0z9MSl+f/z4evx60damuWOHWhQmptn6javMeB6ZTqvXRDeb91w+bnXoxingsMZDPAvwg0Zei7Kci1JIDVai0sYzyfUslkMzpxSKqV6/5rLQsXFjknHzjecOma0rVv8Qz61zzUfXSoq3o1ijS6u3nyhyNU9wZB3CD1iHE4R5z4PbT1CYUJwmkBJAYoCwVzxORELpoJZ8Vg7T6znkud5YbNdSvlSr0rLFq/yL2a66lxp5KswHG+6yjdyaUjxCLTxSaz5xmVjtkdjIjHsVQDG54K6wjtMveclUsfVnHyOsMdWRsENvgF1/3cztOumyCsMIxymNMWyeflZPyiMl/j53MlcMQgpSEhEImidOpk+mG63rXc6PHExaBgDdtTxZyzQkSQTiBMcoJhhQdDO10nuWJhxRnAUNU32OTyIYQwAwAp6eAB4V1C2y6K4If1l0vUraq8DDonqtJk8ouu7U3a+6ybDq0n9Rda9UyjNHzg8rleAuwuki1LmKKIr0TokxAYji2MsVOt3WbidC+H+KkA5FCM5cVD9XhZCEaZICnVnSPAHxMouj0cvhh6kwvqtwugrPnFguF8ybqHDCXf7y/eNmwnNHZE958TuVd4Yn3e1+YGvV0f1IiR7/AA==&lt;/diagram&gt;&lt;/mxfile&gt;">
     <defs/>
     <g>
-        <rect x="0" y="0" width="30" height="30" fill="none" stroke="none" pointer-events="all"/>
-        <g transform="translate(-0.5 -0.5)">
-            <switch>
-                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 15px; margin-left: 15px;">
-                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
-                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: nowrap;">
-                                R
-                            </div>
-                        </div>
-                    </div>
-                </foreignObject>
-                <text x="15" y="19" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
-                    R
-                </text>
-            </switch>
-        </g>
+        <ellipse cx="10" cy="10" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <ellipse cx="43.7" cy="18" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <path d="M 10 10 Q 32.05 10 36.99 10 Q 41.92 10 43.7 18" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="19.86" cy="10" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <ellipse cx="29.72" cy="26" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <path d="M 43.7 18 Q 41.92 28 29.72 26" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="51.09" cy="50" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <path d="M 29.72 26 Q 28.77 51 51.09 50" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
+        <ellipse cx="19.86" cy="38" rx="2" ry="2" fill="rgb(0, 0, 0)" stroke="none" pointer-events="none"/>
+        <path d="M 19.86 10 L 19.86 38" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
     </g>
-    <switch>
-        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
-        <a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank">
-            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
-                Text is not SVG - cannot display
-            </text>
-        </a>
-    </switch>
 </svg>

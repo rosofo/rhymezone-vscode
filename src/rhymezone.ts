@@ -24,9 +24,12 @@ export const store = createStore<{
   setSynonyms: (synonyms: string[]) => set({ synonyms }),
 }));
 
-export async function fetchRhymes(word: string): Promise<string[]> {
+export async function fetchRhymes(
+  word: string,
+  token?: vscode.CancellationToken
+): Promise<string[]> {
   const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=perfect&org1=syl&org2=l&org3=y`;
-  const response: XHRResponse = await xhr({ url });
+  const response: XHRResponse = await xhr({ url, token });
   const $ = cheerio.load(response.responseText);
   const rhymes = $(".r")
     .map((i, el) => $(el).text())
@@ -48,16 +51,16 @@ export async function fetchCached(path: string, callback: () => Promise<any>) {
   }
 }
 
-export async function fetchAll(word: string) {
+export async function fetchAll(word: string, token?: vscode.CancellationToken) {
   store.setState({ word });
   const promises = [
     fetchCached(`/rhymes/${word}`, async () => {
-      const rhymes = await fetchRhymes(word);
+      const rhymes = await fetchRhymes(word, token);
       await setCachedRhymes(word, rhymes);
       return rhymes;
     }).then(store.getState().setRhymes),
-    fetchCachedDefinition(word).then(store.getState().setDefinition),
-    fetchCachedSynonyms(word).then(store.getState().setSynonyms),
+    fetchCachedDefinition(word, token).then(store.getState().setDefinition),
+    fetchCachedSynonyms(word, token).then(store.getState().setSynonyms),
   ];
   await Promise.all(promises);
 }
@@ -94,20 +97,27 @@ export async function setCachedRhymes(word: string, rhymes: string[]) {
   await db.push(`/rhymes/${word}`, rhymes, true);
 }
 
-export function fetchCachedDefinition(word: string) {
+export function fetchCachedDefinition(
+  word: string,
+  token?: vscode.CancellationToken
+) {
   return fetchCached(`/definition/${word}`, async () => {
     const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=def&org1=syl&org2=l&org3=y`;
-    const response: XHRResponse = await xhr({ url });
+    const response: XHRResponse = await xhr({ url, token });
     const $ = cheerio.load(response.responseText);
     const definition: string | null = $("#rz-def-list").html();
     return definition;
   });
 }
 
-export function fetchCachedSynonyms(word: string) {
+export function fetchCachedSynonyms(
+  word: string,
+  token?: vscode.CancellationToken
+) {
   return fetchCached(`/synonyms/${word}`, async () => {
     const url = `https://www.rhymezone.com/r/rhyme.cgi?Word=${word}&typeofrhyme=syn&org1=syl&org2=l&org3=y`;
-    const dom = await jsdom.JSDOM.fromURL(url, {});
+    const response: XHRResponse = await xhr({ url, token });
+    const dom = new jsdom.JSDOM(response.body.toString());
 
     let results;
     for (const script of dom.window.document.body.querySelectorAll("script")) {

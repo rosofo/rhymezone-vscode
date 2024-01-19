@@ -1,12 +1,9 @@
-# Completion Item Provider Sample
+# Rhymezone Extension for VSCode
 
-This sample shows how to provide completions aka IntelliSense into the editor. The sample uses the `CompletionItemProvider` api.
+Why would anyone do this?
 
-![Sample](demo.gif)
+I write my lyrics in markdown files! It's a format I'm comfortable with, and it means I can make things like this to improve my process.
 
+## Usage
 
-## VS Code API
-
-### `vscode` module
-
-- [`languages.registerCompletionItemProvider`](https://code.visualstudio.com/api/references/vscode-api#languages.registerCompletionItemProvider)
+Open the command palette and run 'Rhymezone: Lookup Word'. You'll get a tree of rhymes and synonyms for the word under your cursor. If you move your cursor around the tree will update. Simple as that.
