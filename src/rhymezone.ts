@@ -12,16 +12,28 @@ export const store = createStore<{
   rhymes: string[];
   definition: string | null;
   synonyms: string[];
-  setRhymes: (rhymes: string[]) => void;
-  setDefinition: (definition: string | null) => void;
-  setSynonyms: (synonyms: string[]) => void;
-}>((set) => ({
+  setRhymes: (word: string, rhymes: string[]) => void;
+  setDefinition: (word: string, definition: string | null) => void;
+  setSynonyms: (word: string, synonyms: string[]) => void;
+}>((set, get) => ({
   rhymes: [] as string[],
   definition: null as string | null,
   synonyms: [] as string[],
-  setRhymes: (rhymes: string[]) => set({ rhymes }),
-  setDefinition: (definition: string | null) => set({ definition }),
-  setSynonyms: (synonyms: string[]) => set({ synonyms }),
+  setRhymes: (word: string, rhymes: string[]) => {
+    if (word === get().word) {
+      set({ rhymes });
+    }
+  },
+  setDefinition: (word: string, definition: string | null) => {
+    if (word === get().word) {
+      set({ definition });
+    }
+  },
+  setSynonyms: (word: string, synonyms: string[]) => {
+    if (word === get().word) {
+      set({ synonyms });
+    }
+  },
 }));
 
 export async function fetchRhymes(
@@ -58,9 +70,13 @@ export async function fetchAll(word: string, token?: vscode.CancellationToken) {
       const rhymes = await fetchRhymes(word, token);
       await setCachedRhymes(word, rhymes);
       return rhymes;
-    }).then(store.getState().setRhymes),
-    fetchCachedDefinition(word, token).then(store.getState().setDefinition),
-    fetchCachedSynonyms(word, token).then(store.getState().setSynonyms),
+    }).then((result) => store.getState().setRhymes(word, result)),
+    fetchCachedDefinition(word, token).then((result) =>
+      store.getState().setDefinition(word, result)
+    ),
+    fetchCachedSynonyms(word, token).then((result) =>
+      store.getState().setSynonyms(word, result)
+    ),
   ];
   await Promise.all(promises);
 }
@@ -128,4 +144,15 @@ export function fetchCachedSynonyms(
     console.debug(results);
     return results.map((syn: any) => syn.word);
   });
+}
+export function lookupAtCursor(
+  editor: vscode.TextEditor,
+  tokenSource: vscode.CancellationTokenSource
+) {
+  const word = editor.document.getText(
+    editor.document.getWordRangeAtPosition(editor.selection.active)
+  );
+  vscode.window.withProgress({ location: { viewId: "lookup" } }, () =>
+    fetchAll(word, tokenSource.token)
+  );
 }

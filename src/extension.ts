@@ -1,14 +1,13 @@
 import * as vscode from "vscode";
-import { getErrorStatusDescription } from "request-light";
 import { resultsView } from "./resultsView";
+import { store } from "./rhymezone";
+import { fetchCachedDefinition } from "./rhymezone";
 import {
-  getCachedRhymes,
-  fetchRhymes,
-  setCachedRhymes,
-  fetchAll,
-  store,
-} from "./rhymezone";
-import { fetchCachedDefinition, fetchCachedSynonyms } from "./rhymezone";
+  cancelAndReplaceToken,
+  enableLookupView,
+  focusLookupView,
+} from "./resultsView";
+import { lookupAtCursor } from "./rhymezone";
 
 export function activate(context: vscode.ExtensionContext) {
   const [view, resultsViewProvider] = resultsView();
@@ -18,38 +17,21 @@ export function activate(context: vscode.ExtensionContext) {
   let tokenSource = new vscode.CancellationTokenSource();
 
   vscode.commands.registerCommand("rhymezone.lookup", async () => {
-    tokenSource.cancel();
-    tokenSource = new vscode.CancellationTokenSource();
+    tokenSource = cancelAndReplaceToken(tokenSource);
 
-    vscode.commands.executeCommand(
-      "setContext",
-      "rhymezoneResultsEnabled",
-      true
-    );
-    vscode.commands.executeCommand("lookup.focus");
+    enableLookupView();
+    focusLookupView();
 
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
     }
-    const word = editor.document.getText(
-      editor.document.getWordRangeAtPosition(editor.selection.active)
-    );
-
-    vscode.window.withProgress({ location: { viewId: "lookup" } }, () =>
-      fetchAll(word, tokenSource.token)
-    );
+    lookupAtCursor(editor, tokenSource);
 
     vscode.window.onDidChangeTextEditorSelection((e) => {
-      tokenSource.cancel();
-      tokenSource = new vscode.CancellationTokenSource();
+      tokenSource = cancelAndReplaceToken(tokenSource);
 
-      const word = editor.document.getText(
-        editor.document.getWordRangeAtPosition(editor.selection.active)
-      );
-      vscode.window.withProgress({ location: { viewId: "lookup" } }, () =>
-        fetchAll(word, tokenSource.token)
-      );
+      lookupAtCursor(editor, tokenSource);
     });
   });
 

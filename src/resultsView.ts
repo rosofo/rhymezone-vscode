@@ -61,3 +61,16 @@ export function resultsView() {
   });
   return [view, provider] as const;
 }
+export function focusLookupView() {
+  vscode.commands.executeCommand("lookup.focus");
+}
+export function enableLookupView() {
+  vscode.commands.executeCommand("setContext", "rhymezoneResultsEnabled", true);
+}
+export function cancelAndReplaceToken(
+  tokenSource: vscode.CancellationTokenSource
+) {
+  tokenSource.cancel();
+  tokenSource = new vscode.CancellationTokenSource();
+  return tokenSource;
+}
